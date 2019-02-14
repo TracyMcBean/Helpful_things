@@ -1,0 +1,252 @@
+\documentclass[10pt,landscape]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage{hyperref}
+\usepackage{pifont}
+
+% To make this come out properly in landscape mode, do one of the following
+% 1.
+%  pdflatex latexsheet.tex
+%
+% 2.
+%  latex latexsheet.tex
+%  dvips -P pdf  -t landscape latexsheet.dvi
+%  ps2pdf latexsheet.ps
+
+% The basic layout is taken from a Latex Cheat Sheat .tex file from 
+% Winston Chang http://wch.github.io/latexsheet/
+
+% This sets page margins to .5 inch if using letter paper, and to 1cm
+% if using A4 paper. (This probably isn't strictly necessary.)
+% If using another size paper, use default 1cm margins.
+\ifthenelse{\lengthtest { \paperwidth = 11in}}
+	{ \geometry{top=.5in,left=.5in,right=.5in,bottom=.5in} }
+	{\ifthenelse{ \lengthtest{ \paperwidth = 297mm}}
+		{\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+		{\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+	}
+
+% Turn off header and footer
+\pagestyle{empty}
+ 
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%x
+                                {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+                                {-1explus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%
+                                {\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {1ex plus .2ex}%
+                                {\normalfont\small\bfseries}}
+\makeatother
+
+% Don't print section numbers
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt plus 0.5ex}
+
+
+% -----------------------------------------------------------------------
+
+\begin{document}
+
+\raggedright
+\footnotesize
+\begin{multicols}{3}
+
+
+% multicol parameters
+% These lengths are set only within the two main columns
+%\setlength{\columnseprule}{0.25pt}
+\setlength{\premulticols}{1pt}
+\setlength{\postmulticols}{1pt}
+\setlength{\multicolsep}{1pt}
+\setlength{\columnsep}{2pt}
+
+\begin{center}
+     \Large{\textbf{FORTRAN Reference Card}} \\
+\end{center}
+
+\section{Program Structure}
+\newlength{\MyLen}
+\settowidth{\MyLen}{\texttt{.begin.equation..place.}}
+\begin{tabular}{@{}p{\the\MyLen}%
+                @{}p{\linewidth-\the\MyLen}@{}}
+\verb!PROGRAM! \textit{name}        &  Begin program \textit{name}    \\
+\hspace{2mm}\verb!END PROGRAMM! \textit{name}   &                     \\
+\verb!SUBROUTINE! \textit{name}     &  Begin subroutine \textit{name} \\
+\hspace{2mm}\verb!END SUBROUTINE! \textit{name} &                     
+\end{tabular}
+
+\section{Fortran Preprocessors}
+\begin{tabular}{@{}ll@{}}
+\verb!IMPLICIT NONE!       &  Avoid using predefined data types 
+\end{tabular}
+
+\section{Data Types/Declarations}
+\begin{tabular}{@{}ll@{}}
+\verb!INTEGER!       &  Number without fractional part\\
+\verb!REAL!          &  Floating-point format         \\
+\verb!COMPLEX!       &  \\
+\verb!CHARACTER!     &  String of characters enclosed in \verb!'! or \verb!"!\\
+\verb!LOGICAL!       &
+\end{tabular} \\
+
+\subsection{Additional Attributes}
+\begin{tabular}{@{}ll@{}}
+\verb!KIND! \textit{= val} &  Define presicion of a real \\
+\hspace{2mm} \textit{val} = 4 (32bit), 8(64bit) & GNU Fortran compiler \\
+\verb!PARAMETER! & Value is set to be constant \\
+\verb!DIMENSION! & Assign dimension to an object \\
+\verb!POINTER!   & Object will be pointer to content \\
+\verb!ALLOCATABLE! & Object can be allocated \\
+\verb!PRIVATE!   & Only access object in module \\
+\verb!PUBLIC!    & Not privat\\
+\end{tabular} \\
+
+\textit{Example:} \verb! INTEGER, PARAMETER :: x, value! \\
+\hspace{14mm} \verb!CHARACTER(len=20) :: name!
+Fortran is \textit{case insensitive}. \\
+
+\section{Arrays}
+
+
+\section{Miscellaneous}
+\begin{tabular}{@{}ll@{}}
+\verb@!@ 		& Comment (older versions: \verb!C!)	\\
+\verb!&! 		& Continue statement in new line    
+\end{tabular}
+\\
+\textbf{Statement labels} are numbers without meaning but
+ they can be used to refer to a statement.\\
+\textit{Example:} \verb! 100 output = x + y ! \\ % This is old fortran
+
+\section{Flow Control}
+\begin{tabular}{@{}ll@{}}
+\verb!DO! \textit{name}              &  While loop       \\
+\hspace{2mm}\verb!IF (! \textit{logical\_expr} \verb!) EXIT!  &  Exit condition \\
+\verb!END DO!    					 & 					 \\
+\verb!DO index = istart, iend, incr! & Iterative do loop \\
+\hspace{2mm} \verb!Statements!       &					 \\
+\verb!END DO! 						 &                   
+\end{tabular} \\
+
+Loops and branching statements can have names. \\
+\textit{Example:} \verb!loopname: DO [..] END DO loopname! \\
+
+\settowidth{\MyLen}{\texttt{.begin.equation..place.}}
+\begin{tabular}{@{}p{\the\MyLen}%
+                @{}p{\linewidth-\the\MyLen}@{}}
+\verb!STOP!\textit{'optional string'}& Terminate program              \\
+\verb!ERROR STOP! \textit{'error msg'} & Informs system that program failed after terminating \ding{95} \\
+\end{tabular} \\
+The \verb!STOP! statement is more or less reduntant.
+
+
+\section{Operators}
+Operations beginning with highest in hierarchy.\\
+\begin{tabular}{@{}l@{\hspace{1em}}l@{\hspace{2em}}l@{\hspace{1em}}l@{}}
+Exponentiation       &
+\verb!**!     & &    \\
+Multiplication       &
+\verb!*!             &  
+Division             &
+\verb!/ !           \\  
+Addition             &
+\verb!+!             &
+Subtraction          &
+\verb!-!              
+\end{tabular}
+
+
+\section{Important Functions}
+%describe them properly
+\begin{tabular}{@{}ll@{}}
+\verb!date_and_time!       & Get the date and time			 \\
+\verb!random_seed(size=k)! & Get a random number of size k   \\                   
+\end{tabular} \\
+External functions are called with \verb!CALL!. \\
+\subsection{Math Functions}
+\begin{tabular}{@{}ll@{\hspace{1.3em}}l@{\hspace{0.5em}}}
+\verb!INT(x)!         	& Integer part of x 			& \verb!INT(2.95)! $\rightarrow$ 2  \\
+\verb!NINT(x)!        	& Round x 					 	& \verb!NINT(2.95)! $\rightarrow$ 3  \\ 
+\verb!CEILING(x)!     	& Nearest integer above x		& \verb!CEILING(2.95)! $\rightarrow$ 3	 \\
+\verb!FLOOR(x)!       	& Nearest integer below x 		& \verb!FLOOR(2.95)! $\rightarrow$ 2	 \\
+\verb!REAL(i)!        	& Convert integer to real       &  \\
+\hline          
+\end{tabular} \\
+\begin{tabular}{@{}ll@{}}
+\verb!SQRT(x)!			& Square root of x for x $\geq 0$	\\
+\verb!ABS(x)!			& Absolute value of x 				\\
+\verb!SIN(x), SIND(x)!	& Sine of x (in radians, degrees)	\\
+\verb!COS(x), COSD(x)!  & Cosine of x (radians, degree)		\\
+\verb!TAN(x), TAND(x)! 	& Tangent of x (radians, degree)	\\
+\verb!EXP(x)!			& e to the xth Power				\\
+\verb!LOG(x), LOG10(x)!	& Natural logarithm, Base 10-logarithm \\
+\verb!MOD(a,b)!			& Modulo function					\\
+\verb!MAX(a,b), MIN(a,b)! & Pickes larger/smaller of a and b \\
+\verb!NORM2(array)!     & Calculate Euclidean norm ($L_2$ norm)\ding{95} \\
+\verb!ERF(x), ERFC(X)! 	& (Complementary) Error function  \ding{95}	\\
+\end{tabular} \\
+
+
+\section{Input/Output}
+% possibly good idea to seperate in file and standard I/O
+% And try to say when you would use what.
+\begin{tabular}{@{}ll@{}}
+\verb!WRITE (*,*)! & Print to standard output stream \\
+\verb!READ (*,*)!  & Read from standard input stream \\
+\verb!PRINT *,!    & Print to standard output stream \\
+\end{tabular}
+
+\subsection{Formating I/O}
+
+\section{Compilation gfortran}
+Using gfortran on a UNIX-like system. \\ 
+\verb!gfortran myprogram.f -o myprogram.out! \\
+\textbf{File extensions} (recommendation is first one): \\
+\verb!file.f90! free-form source, no preprocessing\\
+\verb!file.F90! free-form source, preprocessing \\
+\verb!file.f! fixed-form source, no preprocessing\\
+\verb!file.F! fixed-form source, preprocessing \\
+\textbf{Several files:} \\
+First compile subfiles \verb!gfortran -c module.f90!
+Then all \verb!gfortran main.f90 module.o -o main.o! \\
+\textbf{Other Options:} \\
+\begin{tabular}{@{}ll@{}}
+\verb!-std=f95! & Set standard for compiler           \\
+                & (\verb!f2003, f2008, gnu=default, legacy!) \\
+\verb!-Wextra -Wall -pedantic! & Recommended warnings\\
+\end{tabular}
+
+\section{Comments}
+Variable types are indicated by the used character: \\
+x = real; i= int; a,b= int/real \\
+Functions from standard after 95 are marked with a \ding{95} .\\
+%\textbf{Abbreviations:} int=integer; I/O= Input/Output\\
+% In case they are not clear.
+
+%---------------------------------------------------------------------------
+
+\rule{0.3\linewidth}{0.25pt}
+\scriptsize
+
+Copyright \copyright\ \the\year ~ Tracy Kiszler
+No guarantee for anything :)\\
+
+\href{https://github.com/TracyMcBean/Fortran\_cheatsheet}{https://github.com/TracyMcBean/Fortran\_cheatsheet}
+
+
+\end{multicols}
+\end{document}
