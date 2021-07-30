@@ -1,7 +1,7 @@
 # Helpful things
 
 ### Radiosonde class
-Reading of radiosonde data (tested for 2020 Ny-Alesund data) and directly computing IWV, specific humidity and saturation pressure based on Goff and Gratch 1946.
+Reading of radiosonde data (tested for 2020 Ny-Alesund data) and directly computing IWV, specific humidity and saturation pressure based on Goff and Gratch 1946 (\_gg ending) or Hyland and Wexler (1983) with ending \_hw 
 
 @Andreas Walbroel, Theresa Kiszler  
 
@@ -11,7 +11,7 @@ Necessary packages: `xarray` and `numpy`. Example usage:
 import RS_class
 
 filepath="/path/to/netcdffile.nc"
-rs_data = RS_class.RS_data(filepath)
+rs_data = RS_class.RS_data_gg(filepath)
 
 temp = rs_data.temp
 IWV = rs_data.get_IWV_gg()
