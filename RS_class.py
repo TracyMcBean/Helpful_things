@@ -6,23 +6,21 @@ Contains Radiosonde class to get different derived variables (
 saturation pressure water vapour, IWV, and specific humidity)
     
 Implementation by Andreas Walbroel and Theresa Kiszler, 2021.
+
+References to saturation water vapour formulae: 
+http://cires.colorado.edu/~voemel/vp.html
+http://hurri.kean.edu/~yoh/calculations/satvap/satvap.html
 """
-class RS_data(object):
-    """ Create an instance of a radiosonde data set. 
-        Attributes: 
-            temp
-            press
-            rh
-            IWV_gg  integrated water vapor following   
-            q     specific humidity
+
+class RS_data_hw(object):
+    """ Create an instance of a radiosonde data set.
+        Computing IWV using the formula by Hyland and Wexler (1983, used by GRUAN)
     """
     # global constants:
-    global M_dv, g
+    global M_dv, g, R_v
     R_d = 287.04    # gas constant of dry air, in J kg^-1 K^-1
     R_v = 461.5     # gas constant of water vapour, in J kg^-1 K^-1
     M_dv = R_d / R_v # molar mass ratio , in ()
-#    e_0 = 611       # saturation water vapour pressure at freezing point (273.15 K), in Pa
-#    T0 = 273.15     # freezing temperature, in K
     g = 9.80665     # gravitation acceleration, in m s^-2 (from https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication330e2008.pdf)
 
     def __init__(self,RS_ncfile):
@@ -33,50 +31,124 @@ class RS_data(object):
             path to netcdf file containing temp, pres and relative humidity
         """
         rs_ds = xr.open_dataset(RS_ncfile)
-        self.temp = rs_ds.temp.values
+        self.temp = rs_ds.temp.values     # Temperature in Kelvin
         self.pres = rs_ds.press.values
-        self.rh   = rs_ds.rh.values
-        self.qi_gg    = np.nan
-        self.e_sat_gg = np.nan
-        self.IWV_gg  = np.nan
+        self.rh   = rs_ds.rh.values       # relative humidity (0 to 1)
+        self.alt  = rs_ds.alt.values      # height in meters
+        self.geopot = rs_ds.geopot.values # geopotential height
+        self.q_hw    = np.nan    # specific humidity in kg kg^-1
+        self.hua_hw = np.nan     # absolute humidity kg m^-3
+        self.e_sat_hw = np.nan   # saturation vapour pressure Pa
+        self.IWV_hw  = np.nan    # integrated water vapour kg m^-2
 
-    def get_IWV_gg(self):
+    def get_IWV_hw(self):
         """
         Compute Integrated Water Vapour (also known as precipitable water content)
         out of specific humidity (in kg kg^-1), gravitational constant and air pressure (in Pa).
-        Parameters:
-        -----------
-        q : array of floats
-            One dimensional array of specific humidity in kg kg^-1.
-        press : array of floats
-            One dimensional array of pressure in hPa.
+
         Returns:
         --------
         IWV : float
             Integrated water vapour kg m-2
         """
-        q = self.get_q_gg()
-        IWV = self.IWV_gg
-        pres = self.pres
-
-        # Check if the Pressure axis is sorted in descending order:
-        if np.any((pres[1:] - pres[:-1]) > 0):
-            pdb.set_trace()
-            raise ValueError("Height axis must be in ascending order to compute the integrated" +
-                " water vapour.")
-        n_height = len(pres)
-        IWV = 0.0
-        for k in range(n_height):
-            if k == 0:      # bottom of grid
-                dp = 0.5*(pres[k+1] - pres[k])      # just a half of a level difference
-                IWV = IWV - q[k]*dp
-            elif k == n_height-1:   # top of grid
-                dp = 0.5*(pres[k] - pres[k-1])      # the other half level difference
-                IWV = IWV - q[k]*dp
+        hua = self.get_hua_hw()
+        IWV = self.IWV_hw
+        geopot = self.geopot
+        
+        dh = geopot[1:] - geopot[:-1]
+        IWV = sum(hua[:-1]*dh)
+        
+        """ this doesn't work yet 
+        prev_geopot = geopot[0]
+        for k in range(1,len(geopot)):
+            print(geopot[k])
+            if geopot[k] < prev_geopot:
+                print("skipping value where geopot is lower than previous one.")
             else:
-                dp = 0.5*(pres[k+1] - pres[k-1])
-                IWV = IWV - q[k]*dp
-        IWV = IWV / g       # yet had to be divided by gravitational acceleration
+                dh = geopot[k] - prev_geopot
+                IWV += hua[k]*dh
+                prev_geopot = geopot[k-1]  # So that we only use values where the height is increasing
+        """
+
+        return IWV
+
+    def get_e_sat_hw(self):
+        """
+        Compute saturation water vapour pressure following Hyland and Wexler (1983)
+        """
+        temp = self.temp
+        self.e_sat_hw = np.exp(  -0.58002206e4/temp + 0.13914993e1  - 0.48640239e-1*temp + 0.41764768e-4*temp**2 - 0.14452093e-7 *temp**3 + 0.65459673e1 * np.log(temp))
+        return self.e_sat_hw
+
+    def get_q_hw(self):
+        """
+        Convert array of relative humidity (between 0 and 1) to specific humidity
+        in kg kg^-1.
+        Saturation vapour pressure calculated by Hyland and Wexler (1983)
+        """
+        
+        e_sat_water = self.get_e_sat_hw()
+        e = e_sat_water * self.rh
+        self.q_hw = M_dv * e / (e*(M_dv - 1) + self.pres)
+        return self.q_hw
+
+    def get_hua_hw(self):
+        """
+        Get absolute humidity using saturation vapour pressure calculated by Hyland and Wexler (1983).
+        """
+        
+        e_env = self.rh * self.get_e_sat_hw()
+        self.hua_hw = e_env / (R_v*self.temp)
+        return self.hua_hw
+    
+    
+class RS_data_gg(object):
+    """ 
+    Create an instance of a radiosonde data set. 
+    Computing IWV using the formula by Goff and Gratch (1946)
+    """
+    # global constants:
+    global M_dv, g, R_v
+    R_d = 287.04    # gas constant of dry air, in J kg^-1 K^-1
+    R_v = 461.5     # gas constant of water vapour, in J kg^-1 K^-1
+    M_dv = R_d / R_v # molar mass ratio , in ()
+    g = 9.80665     # gravitation acceleration, in m s^-2 (from https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication330e2008.pdf)
+
+    def __init__(self,RS_ncfile):
+        """ Initialize radiosonde data
+        Parameters:
+        -----------
+        RS_ncfile : string
+            path to netcdf file containing temp, pres and relative humidity
+        """
+        rs_ds = xr.open_dataset(RS_ncfile)
+        self.temp = rs_ds.temp.values     # Temperature in Kelvin
+        self.pres = rs_ds.press.values
+        self.rh   = rs_ds.rh.values       # relative humidity (0 to 1)
+        self.alt  = rs_ds.alt.values      # height in meters
+        self.geopot = rs_ds.geopot.values # geopotential height
+        self.q_gg    = np.nan    # specific humidity in kg kg^-1
+        self.hua_gg = np.nan     # absolute humidity kg m^-3
+        self.e_sat_gg = np.nan   # saturation vapour pressure Pa
+        self.IWV_gg  = np.nan    # integrated water vapour kg m^-2
+
+    def get_IWV_gg(self):
+        """
+        Compute Integrated Water Vapour (also known as precipitable water content)
+        out of specific humidity (in kg kg^-1), gravitational constant and air pressure (in Pa).
+        Returns
+        --------
+        IWV : float
+            Integrated water vapour kg m-2
+        """
+        
+        hua = self.get_hua_gg()
+        IWV = self.IWV_gg
+        geopot = self.geopot
+        
+        dh = geopot[1:] - geopot[:-1]
+        IWV = sum(hua[:-1]*dh)
+        
         return IWV
 
     def get_e_sat_gg(self):
@@ -87,10 +159,6 @@ class RS_data(object):
         http://cires.colorado.edu/~voemel/vp.html
         http://hurri.kean.edu/~yoh/calculations/satvap/satvap.html
         e_sat in Pa.
-        Parameters:
-        -----------
-        temp : array of floats
-            Array of temperature (in K).
         """
         temp = self.temp
         self.e_sat_gg = 100 * 1013.246 * 10**(-7.90298*(373.16/temp-1) + 5.02808*np.log10(
@@ -102,16 +170,18 @@ class RS_data(object):
         Convert array of relative humidity (between 0 and 1) to specific humidity
         in kg kg^-1.
         Saturation water vapour pressure computation is based on: see e_sat(temp).
-        Parameters:
-        -----------
-        temp : array of floats
-            Array of temperature (in K).
-        pres : array of floats
-            Array of pressure (in Pa).
-        relhum : array of floats
-            Array of relative humidity (between 0 and 1).
         """
         e_sat_water = self.get_e_sat_gg()
         e = e_sat_water * self.rh
         self.q_gg = M_dv * e / (e*(M_dv - 1) + self.pres)
         return self.q_gg
+    
+    def get_hua_gg(self):
+        """
+        Get absolute humidity using saturation vapour pressure calculated by Hyland and Wexler (1983).
+        """
+        
+        e_env = self.rh * self.get_e_sat_gg()
+        self.hua_gg = e_env / (R_v*self.temp)
+        return self.hua_gg
+    
