@@ -1,14 +1,15 @@
 \BOOKMARK [1][-]{section*.1}{Program Structure}{}% 1
 \BOOKMARK [1][-]{section*.2}{Fortran Preprocessors}{}% 2
-\BOOKMARK [1][-]{section*.3}{Data Types/Declarations}{}% 3
-\BOOKMARK [2][-]{section*.4}{Additional Attributes}{section*.3}% 4
-\BOOKMARK [1][-]{section*.5}{Arrays}{}% 5
-\BOOKMARK [1][-]{section*.6}{Miscellaneous}{}% 6
-\BOOKMARK [1][-]{section*.7}{Flow Control}{}% 7
-\BOOKMARK [1][-]{section*.8}{Operators}{}% 8
-\BOOKMARK [1][-]{section*.9}{Important Functions}{}% 9
-\BOOKMARK [2][-]{section*.10}{Math Functions}{section*.9}% 10
-\BOOKMARK [1][-]{section*.11}{Input/Output}{}% 11
-\BOOKMARK [2][-]{section*.12}{Formating I/O}{section*.11}% 12
-\BOOKMARK [1][-]{section*.13}{Compilation gfortran}{}% 13
-\BOOKMARK [1][-]{section*.14}{Comments}{}% 14
+\BOOKMARK [1][-]{section*.3}{Intrinsic Data Types}{}% 3
+\BOOKMARK [1][-]{section*.4}{Derived Data Types}{}% 4
+\BOOKMARK [2][-]{section*.5}{Additional Attributes}{section*.4}% 5
+\BOOKMARK [1][-]{section*.6}{Arrays}{}% 6
+\BOOKMARK [1][-]{section*.7}{Miscellaneous}{}% 7
+\BOOKMARK [1][-]{section*.8}{Flow Control}{}% 8
+\BOOKMARK [1][-]{section*.9}{Operators}{}% 9
+\BOOKMARK [1][-]{section*.10}{Important Functions}{}% 10
+\BOOKMARK [2][-]{section*.11}{Math Functions}{section*.10}% 11
+\BOOKMARK [1][-]{section*.12}{Input/Output}{}% 12
+\BOOKMARK [2][-]{section*.13}{Formating I/O}{section*.12}% 13
+\BOOKMARK [1][-]{section*.14}{Compilation gfortran}{}% 14
+\BOOKMARK [1][-]{section*.15}{Comments}{}% 15

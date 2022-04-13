@@ -84,9 +84,11 @@
 \begin{tabular}{@{}p{\the\MyLen}%
                 @{}p{\linewidth-\the\MyLen}@{}}
 \verb!PROGRAM! \textit{name}        &  Begin program \textit{name}    \\
-\hspace{2mm}\verb!END PROGRAMM! \textit{name}   &                     \\
+\verb!END PROGRAMM! \textit{name}   &                     \\
 \verb!SUBROUTINE! \textit{name}     &  Begin subroutine \textit{name} \\
-\hspace{2mm}\verb!END SUBROUTINE! \textit{name} &                     
+\verb!END SUBROUTINE! \textit{name} &  \\
+\verb!MODULE! \textit{name}         & Begin module \textit{name} \\
+\verb|END MODULE| \textit{name}                    
 \end{tabular}
 
 \section{Fortran Preprocessors}
@@ -94,14 +96,32 @@
 \verb!IMPLICIT NONE!       &  Avoid using predefined data types 
 \end{tabular}
 
-\section{Data Types/Declarations}
+\section{Intrinsic Data Types}
 \begin{tabular}{@{}ll@{}}
 \verb!INTEGER!       &  Number without fractional part\\
 \verb!REAL!          &  Floating-point format         \\
-\verb!COMPLEX!       &  \\
+\verb!COMPLEX!       &  \verb|(a,b)| Complex number\\
 \verb!CHARACTER!     &  String of characters enclosed in \verb!'! or \verb!"!\\
-\verb!LOGICAL!       &
+\verb!LOGICAL!       &  \verb|.true.| or \verb|.false.|
+\end{tabular}
+\section{Derived Data Types}
+\begin{tabular}{@{}ll@{}}
+\verb|TYPE| \textit{type1}   & Define a new structure \\
+\verb|END TYPE|             & \\
+\verb|TYPE, EXTENDS(type1) ::| \textit{type2} & Extending an existing type\\
+\verb|TYPE(type1) :: name | & Create type \\
+\verb|type1%component|      & Access component of type
 \end{tabular} \\
+\textit{Example:} \\
+\begin{verbatim}
+type Books
+  character(len = 50) :: title
+  integer :: book_id
+end type Books
+type(Books) :: book1 
+book1%title = "Night"
+book1%book_id = 1
+\end{verbatim}
 
 \subsection{Additional Attributes}
 \begin{tabular}{@{}ll@{}}
@@ -110,6 +130,7 @@
 \verb!PARAMETER! & Value is set to be constant \\
 \verb!DIMENSION! & Assign dimension to an object \\
 \verb!POINTER!   & Object will be pointer to content \\
+\verb|TARGET|    & Object is target for a pointer \\
 \verb!ALLOCATABLE! & Object can be allocated \\
 \verb!PRIVATE!   & Only access object in module \\
 \verb!PUBLIC!    & Not privat\\
@@ -157,16 +178,12 @@ The \verb!STOP! statement is more or less reduntant.
 \section{Operators}
 Operations beginning with highest in hierarchy.\\
 \begin{tabular}{@{}l@{\hspace{1em}}l@{\hspace{2em}}l@{\hspace{1em}}l@{}}
-Exponentiation       &
-\verb!**!     & &    \\
-Multiplication       &
-\verb!*!             &  
-Division             &
-\verb!/ !           \\  
-Addition             &
-\verb!+!             &
-Subtraction          &
-\verb!-!              
+Exponentiation       & \verb!**!     & &    \\
+Multiplication       & \verb!*!             & Division             & \verb!/ !           \\  
+Addition             & \verb!+!             & Subtraction          & \verb!-!           \\
+\end{tabular}
+\begin{tabular}{@{}ll@{}}
+	\verb|=>|   &   Assign target/object to pointer
 \end{tabular}
 
 
@@ -224,10 +241,13 @@ Using gfortran on a UNIX-like system. \\
 First compile subfiles \verb!gfortran -c module.f90!
 Then all \verb!gfortran main.f90 module.o -o main.o! \\
 \textbf{Other Options:} \\
-\begin{tabular}{@{}ll@{}}
+\settowidth{\MyLen}{\texttt{.begin.equation..place...}}
+\begin{tabular}{@{}p{\the\MyLen}%
+			@{}p{\linewidth-\the\MyLen}@{}}
 \verb!-std=f95! & Set standard for compiler           \\
                 & (\verb!f2003, f2008, gnu=default, legacy!) \\
 \verb!-Wextra -Wall -pedantic! & Recommended warnings\\
+\verb|-c|       & Necessary if only module or subroutine compilation \\
 \end{tabular}
 
 \section{Comments}
@@ -242,8 +262,7 @@ Functions from standard after 95 are marked with a \ding{95} .\\
 \rule{0.3\linewidth}{0.25pt}
 \scriptsize
 
-Copyright \copyright\ \the\year ~ Tracy Kiszler
-No guarantee for anything :)\\
+\the\year ~ Tracy Kiszler; No guarantee for anything :)\\
 
 \href{https://github.com/TracyMcBean/Fortran\_cheatsheet}{https://github.com/TracyMcBean/Fortran\_cheatsheet}
 
