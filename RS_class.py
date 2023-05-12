@@ -178,7 +178,7 @@ class RS_data_gg(object):
     
     def get_hua_gg(self):
         """
-        Get absolute humidity using saturation vapour pressure calculated by Hyland and Wexler (1983).
+        Get absolute humidity using saturation vapour pressure.
         """
         
         e_env = self.rh * self.get_e_sat_gg()
